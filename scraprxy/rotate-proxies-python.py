@@ -4,20 +4,20 @@ from scraprxy.proxy_scraper import scrape
 from scraprxy.proxy_checker import check
 
 
-def get(url, proxy=None):
+def get(url, method="http", proxy=None):
     session = requests.Session()
     if not proxy:
-        proxy = rotate_proxy(url)
+        proxy = rotate_proxy(url, method)
     try:
-        response = session.get(url, proxies={"http": f"http://{proxy}"}, timeout=30)
+        response = session.get(url, proxies={"http": f"{method}://{proxy}"}, timeout=30)
     except Exception as e:
         raise e
     return response
 
 
-def rotate_proxy(url):
+def rotate_proxy(url, method="http"):
     # create a tuple from unchecked and working sets
-    available_proxies = check(scrape("http"), "http", url)
+    available_proxies = check(scrape(method), method, url)
     if not available_proxies:
         raise Exception("no proxies available")
     return random.choice(available_proxies)
